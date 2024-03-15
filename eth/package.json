@@ -1,0 +1,6 @@
+{
+  "name": "ensauth-eth",
+  "dependencies": {
+    "hardhat": "^2.22.1"
+  }
+}
