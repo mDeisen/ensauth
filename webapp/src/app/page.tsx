@@ -1,7 +1,10 @@
 "use client"
 import { ConnectKitButton } from "connectkit";
+import Link from "next/link";
+import { useAccount } from "wagmi";
 
-export default function Home() {
+export default function Dashboard() {
+  const { isConnected } = useAccount();
   return (
     <>
       <section className="hero is-small is-primary">
@@ -15,9 +18,22 @@ export default function Home() {
         </div>
       </section>
       <section className="section">
-        Hello Ethereum!
         <ConnectKitButton/>
       </section>
+      {isConnected
+      ? <section className="section">
+        <div className="buttons">
+          <Link className="button" href="/profile">
+            Your profile
+          </Link>
+          <Link className="button" href="/profile">
+            User administration
+          </Link>
+        </div>
+      </section>
+      : <section className="section">
+        You have to connect with your wallet to continue
+      </section>}
     </>
   );
 }
