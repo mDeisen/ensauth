@@ -1,11 +1,19 @@
 "use client"
 import { ConnectKitButton } from "connectkit";
-import Link from "next/link";
+import { Input } from "@ensdomains/thorin";
 import { useAccount } from "wagmi";
 import cx from "classnames";
+import { Field, Form, Formik } from "formik";
+import { useRouter } from "next/navigation";
 
-export default function Dashboard() {
+export default function LandingPage() {
   const { isConnected } = useAccount();
+  const { push } = useRouter();
+
+  const navigateToApp = (label: string) => {
+    push(`/app/${label}`);
+  }
+
   return (
     <>
       <section className="hero is-small is-primary">
@@ -21,18 +29,22 @@ export default function Dashboard() {
       <section className="section">
         <ConnectKitButton/>
       </section>
-      <section className={cx("section", {"is-hidden": !isConnected})}>
-        <div className="buttons">
-          <Link className="button" href="/profile">
-            Your profile
-          </Link>
-          <Link className="button" href="/administration">
-            User administration
-          </Link>
-        </div>
-      </section>
       <section className={cx("section", {"is-hidden": isConnected})}>
         You have to connect with your wallet to continue
+      </section>
+      <section className={cx("section", {"is-hidden": !isConnected})}>
+        <Formik initialValues={{label: ""}} onSubmit={(vars) => navigateToApp(vars.label)}>
+          <Form>
+            <div className="block">
+              <Field as={Input} label="Select your application" placeholder="example.com" name="label"/>
+            </div>
+            <div className="buttons">
+              <button className="button is-primary" type="submit">
+                Manage
+              </button>
+            </div>
+          </Form>
+        </Formik>
       </section>
     </>
   );
