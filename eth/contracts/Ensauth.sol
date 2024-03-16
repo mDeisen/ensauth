@@ -78,7 +78,7 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
      * Add the role to the application
      */
     function registerRole(bytes32 groupnode, string memory roleName) public {
-        require(applications[groupnode].exists, "Application does not exist.");
+        require(applications[groupnode].exists, "RegisterRole: Application does not exist");
         require(
             !applications[groupnode].roles[roleName].exists,
             "Role already exists."
@@ -102,7 +102,7 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         string memory roleName,
         address account
     ) public {
-        require(applications[groupnode].exists, "Application does not exist.");
+        require(applications[groupnode].exists, "AssignRole: Application does not exist.");
         Role storage role = applications[groupnode].roles[roleName];
         require(role.exists, "Role does not exist.");
         require(!role.userExists[account], "User already assigned to role.");
@@ -193,7 +193,7 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
             "Subdomain must start with 'groups'"
         );
 
-        // registerApplication(bytes32(id));
+        registerApplication(bytes32(id));
 
         return this.onERC1155Received.selector;
     }
@@ -256,15 +256,15 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
 
         // Return groups if it is groups
         if (keccak256(bytes(key)) == keccak256("groups")) {
-            require(applications[node].exists, "Application does not exist.");
+            require(applications[node].exists, "TextResolver - Groups: Application does not exist.");
             string memory result = arrayToString(applications[node].rolesArray);
             return result;
         } 
-        require(applications[node].exists, "Application does not exist.");
-        
-        string memory role = string(abi.encodePacked(key));
-        require(applications[node].roles[role].exists, "Role does not exist."); 
-        return arrayToString(applications[node].roles[role].users);
+        require(applications[node].exists, "TextResolver: Application does not exist.");
+
+        require(applications[node].roles[key[7:]].exists, "Role does not exist."); 
+        return arrayToString(applications[node].roles[key[7:]].users);
+        // return "";
     }
 
     /**
