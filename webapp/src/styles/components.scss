@@ -1,0 +1,19 @@
+.gli {
+    display: flex;
+    flex-direction: row;
+    padding: 0.25rem 1rem;
+    cursor: pointer;
+
+    &__container {
+        padding: 0.3rem 0;
+        border-bottom: 1px solid $grey-lighter;
+    }
+
+    &:hover {
+        background-color: $grey-lightest;
+    }
+
+    &__name {
+        font-size: $size-5;
+    }
+}

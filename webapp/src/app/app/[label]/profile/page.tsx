@@ -8,8 +8,8 @@ import { useParams } from "next/navigation";
 import { useWalletClient } from "wagmi";
 
 export default function Profile() {
-  const { label: appLabel } = useParams()
-  const { data: wallet } = useWalletClient()
+  const { label: appLabel } = useParams();
+  const { data: wallet } = useWalletClient();
   const { data: profile } = useQuery({
     queryKey: ["profile", wallet?.account.address],
     queryFn: () => {

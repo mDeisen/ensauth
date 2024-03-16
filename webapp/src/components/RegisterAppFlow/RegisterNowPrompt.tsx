@@ -12,7 +12,7 @@ const RegisterNowPrompt: FC = () => {
   const qc = useQueryClient()
   const subdomain = delegatedDomain(appLabel.toString())
 
-  const { mutate, error, status, isPending} = useMutation({
+  const { mutate } = useMutation({
     mutationFn: () => {
       if (!wallet) throw new Error("Wallet not defined");
       return wrapSubdomain(wallet!, subdomain, process.env.NEXT_PUBLIC_EAUTH_CONTRACT_ADDR as any);

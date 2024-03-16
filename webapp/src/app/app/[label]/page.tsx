@@ -54,7 +54,7 @@ export default function Dashboard() {
       <Link className="button" href={`${path}/profile`}>
         Your profile
       </Link>
-      <Link className="button" href={`${path}/administration`}>
+      <Link className="button" href={`${path}/groups`}>
         User administration
       </Link>
     </div></Skeleton>;

@@ -21,6 +21,10 @@ export async function getUsersGroups(client: WalletClient, label: string, user: 
     return ["Administrator", "Contributor"];
 }
 
+export async function listGroups(client: WalletClient, label: string): Promise<string[]> {
+    return ["Administrator", "Contributor", "Banned"];
+}
+
 export async function listGroupMembers(client: WalletClient, label: string, groupName: string): Promise<string[]> {
     return ["0x123", "0x456"];
 }
