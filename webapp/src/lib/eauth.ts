@@ -28,3 +28,7 @@ export async function listGroups(client: WalletClient, label: string): Promise<s
 export async function listGroupMembers(client: WalletClient, label: string, groupName: string): Promise<string[]> {
     return ["0x123", "0x456"];
 }
+
+export async function createGroup(client: WalletClient, label: string, groupName: string): Promise<void> {
+    return;
+}
