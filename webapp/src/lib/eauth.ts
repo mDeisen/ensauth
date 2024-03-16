@@ -30,6 +30,7 @@ export async function isAppOwnedByUser(client: WalletClient, label: string): Pro
 }
 
 export async function getUsersGroups(client: WalletClient, label: string, user: string): Promise<string[]> {
+    // Mock, to be replaced in future
     return ["Administrator", "Contributor"];
 }
 
