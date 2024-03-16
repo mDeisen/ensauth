@@ -9,6 +9,7 @@ import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 import "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 // Emit TextChanged Event on Change
 
@@ -61,12 +62,6 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
             address(this)
         );
 
-        // mainnet
-        // INameWrapper().setResolver(
-        //     groupnode,
-        //     address(this)
-        // );
-
         constructTextRecordsAndEmitEvent(groupnode);
     }
 
@@ -108,8 +103,9 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         require(!role.userExists[account], "User already assigned to role.");
 
         applications[groupnode].roles[roleName].userExists[account] = true;
-
-        applications[groupnode].roles[roleName].users.push(string(abi.encodePacked(account)));
+        
+        string memory accountS = Strings.toHexString(uint256(uint160(account)), 20);
+        applications[groupnode].roles[roleName].users.push(accountS);
  
         
         constructTextRecordsAndEmitEvent(groupnode);
@@ -264,7 +260,6 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
 
         require(applications[node].roles[key[7:]].exists, "Role does not exist."); 
         return arrayToString(applications[node].roles[key[7:]].users);
-        // return "";
     }
 
     /**
