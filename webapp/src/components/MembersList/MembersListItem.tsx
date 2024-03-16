@@ -1,13 +1,16 @@
 "use client"
+import { removeUserFromGroup } from "@/lib/eauth";
 import { getProfile } from "@/lib/ens";
 import { Avatar, CrossSVG, Skeleton } from "@ensdomains/thorin";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { FC } from "react";
 import { useWalletClient } from "wagmi";
 
 const MembersListItem: FC<{ addr: string }> = ({ addr }) => {
     const { data: wallet } = useWalletClient();
+    const { label: appLabel, group } = useParams();
+    const qc = useQueryClient();
     const { data: profile, isSuccess } = useQuery({
         queryKey: ["profile", wallet?.account.address],
         queryFn: () => {
@@ -15,6 +18,14 @@ const MembersListItem: FC<{ addr: string }> = ({ addr }) => {
         },
         enabled: !!wallet
       });
+    const { mutate: removeMember } = useMutation({
+        mutationFn: () => {
+            if (!wallet) throw new Error("Wallet is undefined");
+            return removeUserFromGroup(wallet, appLabel.toString(), addr, group.toString())
+        },
+        onSuccess: () => {qc.invalidateQueries({queryKey: ["members", appLabel, group]})},
+        onMutate: () => {qc.setQueryData(["members", appLabel, group], (old: string[]): string[] => old.filter((m) => m !== addr))}
+    }) 
 
 
     return (
@@ -25,7 +36,7 @@ const MembersListItem: FC<{ addr: string }> = ({ addr }) => {
                     </div>
                     <div className="mli__name">{profile?.display}</div>
                     <div className="mli__buttons">
-                        <a onClick={() => {}}>
+                        <a onClick={() => {removeMember()}}>
                             <CrossSVG className="mli__cross"/>
                         </a>
                     </div>

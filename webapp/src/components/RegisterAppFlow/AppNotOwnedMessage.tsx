@@ -7,16 +7,9 @@ const AppNotOwnedMessage: FC = () => {
     const path = usePathname();
 
   return (
-    <>
-        <div>
-            This app is registered but you're not the owner. You may view your group memberships here and add them to your profile.
-        </div>
-        <div>
-        <Link className="button" href={`${path}/profile`}>
-            Your profile
-        </Link>
-        </div>
-    </>
+    <div className="block">
+        This app is registered but you're not the owner. You can still <Link href={`${path}/profile`} className="link"> view your group memberships here</Link>.
+    </div>
   );
 }
 

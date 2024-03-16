@@ -49,6 +49,22 @@ export async function addUserToGroup(client: WalletClient, label: string, user:s
     return waitForTransactionReceipt(client, {hash: txHash});
 }
 
+export async function removeUserFromGroup(client: WalletClient, label: string, user:string, group: string): Promise<TransactionReceipt> {
+    let userAddr = user;
+    if (user.includes(".")) {
+        const addr = await getAddr(client.extend(publicActions) as any, user);
+        if (!addr) {
+            throw new Error(`Name ${user} cannot be resolved`);
+        }
+        userAddr = addr;
+    }
+
+    const contract = getEnsAuth(client);
+    const node = namehash(normalize(`${process.env.NEXT_PUBLIC_AUTH_PREFIX}.${label}`));
+    const txHash = await contract.write.removeRole([node, group, userAddr]);
+    return waitForTransactionReceipt(client, {hash: txHash});
+}
+
 export async function listGroups(client: WalletClient, label: string): Promise<string[]> {
     const result = await getTextRecord(client.extend(publicActions) as any, {
         name: `${process.env.NEXT_PUBLIC_AUTH_PREFIX}.${label}`,
@@ -63,7 +79,16 @@ export async function listGroups(client: WalletClient, label: string): Promise<s
 }
 
 export async function listGroupMembers(client: WalletClient, label: string, groupName: string): Promise<string[]> {
-    return ["0x123", "0x456"];
+    const result = await getTextRecord(client.extend(publicActions) as any, {
+        name: `${process.env.NEXT_PUBLIC_AUTH_PREFIX}.${label}`,
+        key: `groups.${groupName}`
+    });
+
+    if (!result) {
+        throw new Error(`Text record 'groups.${groupName}' not found`);
+    }
+    
+    return result.trim().split(" ");
 }
 
 export async function createGroup(client: WalletClient, label: string, groupName: string): Promise<TransactionReceipt> {

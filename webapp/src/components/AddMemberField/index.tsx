@@ -3,7 +3,7 @@ import { Input } from "@ensdomains/thorin";
 import { Field, Form, Formik } from "formik";
 import { FC } from "react";
 import cx from "classnames";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWalletClient } from "wagmi";
 import { addUserToGroup } from "@/lib/eauth";
 import { useParams } from "next/navigation";
@@ -11,12 +11,14 @@ import { useParams } from "next/navigation";
 const AddMemberField: FC = () => {
   const { data: wallet } = useWalletClient();
   const { label: appLabel, group } = useParams();
+  const qc = useQueryClient();
 
   const { mutate, isPending } = useMutation({
     mutationFn: (vars: {newUser: string}) => {
       if (!wallet) throw new Error("Wallet is undefined");
       return addUserToGroup(wallet, appLabel.toString(), vars.newUser, group.toString())
     },
+    onSuccess: () => {qc.invalidateQueries({queryKey: ["members", appLabel, group]})}
   })
 
   return (

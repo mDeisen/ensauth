@@ -3,10 +3,27 @@ import { useParams, usePathname } from "next/navigation";
 import { FC } from "react";
 import cx from "classnames";
 import Link from "next/link";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { wrapSubdomain } from "@/lib/ens";
+import { delegatedDomain } from "@/lib/eauth";
+import { useWalletClient } from "wagmi";
 
 const RegisterAppFlow: FC<{step: number}> = ({ step }) => {
     const { label: appLabel } = useParams();
     const path = usePathname();
+    const { data: wallet } = useWalletClient();
+    const qc = useQueryClient();
+
+    const subdomain = delegatedDomain(appLabel.toString())
+
+    const { mutate: registerApp, isPending: registrationPending } = useMutation({
+        mutationFn: () => {
+          if (!wallet) throw new Error("Wallet not defined");
+          return wrapSubdomain(wallet!, subdomain, process.env.NEXT_PUBLIC_EAUTH_CONTRACT_ADDR as any);
+        },
+        // Cache update
+        onSuccess: () => qc.setQueryData(["appRegistered", appLabel], true)
+      })
 
   return (
     <ul className="steps has-content-centered">
@@ -45,7 +62,9 @@ const RegisterAppFlow: FC<{step: number}> = ({ step }) => {
                 </div>
             }
             { step === 2 && <div>
-                <button className="button is-primary">Click here to start</button>
+                <button className={cx("button is-primary", {"is-loading": registrationPending})} onClick={() => registerApp()}>
+                    Click here to start
+                </button>
             </div>}
         </div>
       </li>

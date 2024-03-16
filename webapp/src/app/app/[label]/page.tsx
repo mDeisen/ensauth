@@ -4,10 +4,9 @@ import AppNotOwnedMessage from "@/components/registerAppFlow/AppNotOwnedMessage"
 import DomainNotOwnedMessage from "@/components/registerAppFlow/DomainNotOwnedMessage";
 import { isAppOwnedByUser, isAppRegistered, listGroups } from "@/lib/eauth";
 import { getOwner } from "@/lib/ens";
-import { Skeleton } from "@ensdomains/thorin";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
+import { ReactNode } from "react";
 import { useWalletClient } from "wagmi";
 
 export default function Dashboard() {
@@ -42,7 +41,7 @@ export default function Dashboard() {
     });
 
     let step = 1;
-
+    let warning: ReactNode = undefined;
 
     if (domainIsRegistered === true) {
       step = 2;
@@ -57,21 +56,15 @@ export default function Dashboard() {
     }
 
     if (appIsOwnedByUser === false && appIsRegistered === false) {
-      return <DomainNotOwnedMessage/>
+      warning = <DomainNotOwnedMessage/>
     }
 
     if (appIsOwnedByUser === false && appIsRegistered === true) {
-      return <AppNotOwnedMessage/>
+      warning = <AppNotOwnedMessage/>
     }
 
-    return <RegisterAppFlow step={step}/>;
-
-    return <Skeleton loading={!isSuccess}><div className="buttons">
-      <Link className="button" href={`${path}/profile`}>
-        Your profile
-      </Link>
-      <Link className="button" href={`${path}/groups`}>
-        User administration
-      </Link>
-    </div></Skeleton>;
+    return <div>
+      {warning}
+      <RegisterAppFlow step={step}/>
+    </div>;
 }
