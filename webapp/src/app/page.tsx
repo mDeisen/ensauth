@@ -26,7 +26,7 @@ export default function Dashboard() {
           <Link className="button" href="/profile">
             Your profile
           </Link>
-          <Link className="button" href="/profile">
+          <Link className="button" href="/administration">
             User administration
           </Link>
         </div>
