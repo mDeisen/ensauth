@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+// import hardhat logger
+import "hardhat/console.sol";
+
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
+import "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
-contract Ensauth is IERC1155Receiver, ERC165, Initializable {
+
+contract Ensauth is IERC1155Receiver, ERC165, Initializable{
     struct Role {
         bool exists;
         mapping(address => bool) userExists;
@@ -45,10 +50,17 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable {
         // Use default resolver
 
         // Set the ens lookup address of the subdomain to the address of this contract
-        Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(
+
+        // sepolia
+        Resolver(0x8FADE66B79cC9f707aB26799354482EB93a5B7dD).setAddr(
             groupnode,
             address(this)
         );
+        // mainnet
+        // Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(
+        //     groupnode,
+        //     address(this)
+        // );
     }
 
     /**
@@ -143,13 +155,13 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable {
         bytes32 node = bytes32(id);
 
         // Lookup the name of the node
-        string memory name = Resolver(
-            0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63
-        ).name(node);
+
+        // Sepolia
+        bytes memory name = INameWrapper(0x0635513f179D50A207757E05759CbD106d7dFcE8).names(node);
 
         // Check if the subdomain starts with "groups"
         require(
-            startsWith(name, "groups"),
+            startsWith(name, bytes("groups")),
             "Subdomain must start with 'groups'"
         );
 
@@ -174,36 +186,28 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable {
             bytes32 node = bytes32(ids[i]);
 
             // Lookup the name of the node
-            string memory name = Resolver(
-                0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63
-            ).name(node);
-
-            // Check if the subdomain starts with "groups"
-            require(
-                startsWith(name, "groups"),
-                "Subdomain must start with 'groups'"
-            );
-
             registerApplication(bytes32(ids[i]));
         }
         return this.onERC1155BatchReceived.selector;
     }
 
     function startsWith(
-        string memory name,
-        string memory prefix
+        bytes memory name,
+        bytes memory prefix
     ) public pure returns (bool) {
-        bytes memory nameBytes = bytes(name);
-        bytes memory prefixBytes = bytes(prefix);
 
         // If the prefix is longer than the name, it's impossible for the name to start with the prefix
-        if (prefixBytes.length > nameBytes.length) {
+        if (prefix.length > name.length) {
+            return false;
+        }
+
+        if (name[0] != bytes1(0x06)) {
             return false;
         }
 
         // Compare each byte of the prefix with the beginning of the name
-        for (uint i = 0; i < prefixBytes.length; i++) {
-            if (nameBytes[i] != prefixBytes[i]) {
+        for (uint i = 0; i < prefix.length; i++) {
+            if (name[i+1] != prefix[i]) {
                 return false; // If any byte doesn't match, the name doesn't start with the prefix
             }
         }

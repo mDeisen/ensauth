@@ -1,5 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox-viem";
+import "@nomicfoundation/hardhat-verify";
 
 require("@openzeppelin/hardhat-upgrades");
 require('dotenv').config(); 
@@ -23,6 +24,14 @@ module.exports = {
     // tests: "./test",
     // cache: "./cache",
     // artifacts: "./artifacts",
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    
+    apiKey: {
+      sepolia: "IT2RFBE4JCFEA8J48ZU6N1RFI9Q769M39N"
+    }
   },
 };
 
