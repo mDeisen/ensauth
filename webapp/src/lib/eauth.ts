@@ -1,6 +1,6 @@
 import { TransactionReceipt, WalletClient, getContract, namehash, publicActions } from "viem";
 import { getAddr, getOwner } from "./ens";
-import EnsAuthJson from "../../../eth/artifacts/contracts/Ensauth.sol/Ensauth.json"
+import EnsAuthJson from "./Ensauth.json"
 import { getTextRecord } from "@ensdomains/ensjs/public";
 import { normalize } from "viem/ens";
 import { waitForTransactionReceipt } from "viem/actions";

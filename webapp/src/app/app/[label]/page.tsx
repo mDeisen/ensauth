@@ -1,7 +1,7 @@
 "use client"
-import RegisterAppFlow from "@/components/registerAppFlow";
-import AppNotOwnedMessage from "@/components/registerAppFlow/AppNotOwnedMessage";
-import DomainNotOwnedMessage from "@/components/registerAppFlow/DomainNotOwnedMessage";
+import RegisterAppFlow from "@/components/RegisterAppFlow";
+import AppNotOwnedMessage from "@/components/RegisterAppFlow/AppNotOwnedMessage";
+import DomainNotOwnedMessage from "@/components/RegisterAppFlow/DomainNotOwnedMessage";
 import { isAppOwnedByUser, isAppRegistered, listGroups } from "@/lib/eauth";
 import { getOwner } from "@/lib/ens";
 import { useQuery } from "@tanstack/react-query";
