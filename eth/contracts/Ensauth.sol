@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
 
-// Uncomment this line to use console.log
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
-
 contract Ensauth is IERC1155Receiver, ERC165 {
     struct Role {
         bool exists;
-        address[] users;
+        mapping(address => bool) userExists;
     }
 
     struct Application {
@@ -23,25 +20,30 @@ contract Ensauth is IERC1155Receiver, ERC165 {
     mapping(bytes32 => Application) private applications;
 
     /**
-     * 
+     *
      * @param groupnode -- the namehash of the subdomain starting with "groups"
      * Check if the application exists. Revert if it does.
      * Set the resolver for the subdomain to the public ens resolver
      * Set the ens lookup address of the subdomain to the address of this contract
      */
     function registerApplication(bytes32 groupnode) public {
-        
-        // Check if the application exists. Revert if it does        
-        require(!applications[groupnode].exists, "Application already registered.");
+        // Check if the application exists. Revert if it does
+        require(
+            !applications[groupnode].exists,
+            "Application already registered."
+        );
 
-        // Add the application entry        
+        // Add the application entry
         applications[groupnode].exists = true;
 
-        // Use default resolver 
-        
+        // Use default resolver
+
         // Set the ens lookup address of the subdomain to the address of this contract
-        Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(groupnode, address(this));
-   }
+        Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(
+            groupnode,
+            address(this)
+        );
+    }
 
     /**
      * @param groupnode -- the namehash of the subdomain
@@ -52,7 +54,10 @@ contract Ensauth is IERC1155Receiver, ERC165 {
      */
     function registerRole(bytes32 groupnode, string memory roleName) public {
         require(applications[groupnode].exists, "Application does not exist.");
-        require(!applications[groupnode].roles[roleName].exists,"Role already exists.");
+        require(
+            !applications[groupnode].roles[roleName].exists,
+            "Role already exists."
+        );
         applications[groupnode].roles[roleName].exists = true;
     }
 
@@ -68,14 +73,12 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         string memory roleName,
         address account
     ) public {
-        // Revert if the application does not existst
         require(applications[groupnode].exists, "Application does not exist.");
+        Role storage role = applications[groupnode].roles[roleName];
+        require(role.exists, "Role does not exist.");
+        require(!role.userExists[account], "User already assigned to role.");
 
-        // Revert if the role does not exist
-        require(applications[groupnode].roles[roleName].exists,"Role does not exist.");
-
-        // Add the account to the role
-        applications[groupnode].roles[roleName].users.push(account);
+        role.userExists[account] = true;
     }
 
     /**
@@ -91,26 +94,16 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         string memory roleName,
         address account
     ) public {
-        // Revert if the application does not exist
         require(applications[groupnode].exists, "Application does not exist.");
-        
-        // Revert if the role does not exist
-        require(applications[groupnode].roles[roleName].exists,"Role does not exist.");
-
-        // Remove the account from the role
         Role storage role = applications[groupnode].roles[roleName];
-        for (uint256 i = 0; i < role.users.length; i++) {
-            if (role.users[i] == account) {
-                role.users[i] = role.users[role.users.length - 1];
-                role.users.pop();
-                break;
-            }
-        }
+        require(role.exists, "Role does not exist.");
+        require(role.userExists[account], "User not in role.");
+
+        role.userExists[account] = false;
     }
 
     function isAuthorized(
-        bytes32 app,
-        string memory roleName,
+        bytes32 groupnode,
         address account
     ) public pure returns (bool) {
         return true;
@@ -140,16 +133,20 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         uint256 value, // Dont use
         bytes calldata data // Dont use
     ) external override returns (bytes4) {
-        
         // Transform id into the namehash in bytes32
         bytes32 node = bytes32(id);
-        
+
         // Lookup the name of the node
-        string memory name = Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).name(node);
-        
+        string memory name = Resolver(
+            0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63
+        ).name(node);
+
         // Check if the subdomain starts with "groups"
-        require(startsWith(name, "groups"), "Subdomain must start with 'groups'");
-        
+        require(
+            startsWith(name, "groups"),
+            "Subdomain must start with 'groups'"
+        );
+
         registerApplication(bytes32(id));
 
         return this.onERC1155Received.selector;
@@ -167,23 +164,29 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         bytes calldata data
     ) external override returns (bytes4) {
         for (uint256 i = 0; i < ids.length; i++) {
-
             // Transform id into the namehash in bytes32
             bytes32 node = bytes32(ids[i]);
 
             // Lookup the name of the node
-            string memory name = Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).name(node);
+            string memory name = Resolver(
+                0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63
+            ).name(node);
 
             // Check if the subdomain starts with "groups"
-            require(startsWith(name, "groups"), "Subdomain must start with 'groups'");
+            require(
+                startsWith(name, "groups"),
+                "Subdomain must start with 'groups'"
+            );
 
             registerApplication(bytes32(ids[i]));
         }
         return this.onERC1155BatchReceived.selector;
     }
 
-
-   function startsWith(string memory name, string memory prefix) public pure returns (bool) {
+    function startsWith(
+        string memory name,
+        string memory prefix
+    ) public pure returns (bool) {
         bytes memory nameBytes = bytes(name);
         bytes memory prefixBytes = bytes(prefix);
 
