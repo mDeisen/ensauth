@@ -6,6 +6,12 @@ import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { FC } from "react"
 import { addEnsContracts } from "@ensdomains/ensjs";
 
+console.table({
+  "alchemy": process.env.NEXT_PUBLIC_ALCHEMY_ID,
+  "walletconnect": process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
+  "contract": process.env.NEXT_PUBLIC_EAUTH_CONTRACT_ADDR
+})
+
 const config = createConfig(
   getDefaultConfig({
     // Your dApps chains
