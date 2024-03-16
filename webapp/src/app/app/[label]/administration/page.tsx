@@ -11,11 +11,8 @@ export default function Administration() {
 
     const { mutate, error, status, isPending} = useMutation({
       mutationFn: (vars: {subdomain: string, newOwner: `0x${string}`}) => {
-        if (!wallet) {
-          throw new Error("Wallet is undefined");
-        }
-
-        return wrapSubdomain(wallet, vars.subdomain, vars.newOwner);
+        if (!wallet) throw new Error("Wallet not defined");
+        return wrapSubdomain(wallet!, vars.subdomain, vars.newOwner);
       }
     })
 

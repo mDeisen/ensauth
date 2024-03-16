@@ -1,5 +1,6 @@
 "use client"
 import AppNotOwnedMessage from "@/components/RegisterAppFlow/AppNotOwnedMessage";
+import DomainNotOwnedMessage from "@/components/RegisterAppFlow/DomainNotOwnedMessage";
 import RegisterEnsPrompt from "@/components/RegisterAppFlow/RegisterEnsPrompt";
 import { isAppOwnedByUser, isAppRegistered } from "@/lib/eauth";
 import { getOwner } from "@/lib/ens";
@@ -37,7 +38,11 @@ export default function Dashboard() {
       return <RegisterEnsPrompt/>
     }
 
-    if (appIsOwnedByUser === false) {
+    if (appIsOwnedByUser === false && appIsRegistered === false) {
+      return <DomainNotOwnedMessage/>
+    }
+
+    if (appIsOwnedByUser === false && appIsRegistered === true) {
       return <AppNotOwnedMessage/>
     }
 
