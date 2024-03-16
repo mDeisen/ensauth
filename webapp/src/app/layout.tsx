@@ -26,7 +26,7 @@ export default function RootLayout({
         <ConnectKitWrapper>
           <ThorinWrapper>
             <Navbar/>
-                {children}
+              {children}
           </ThorinWrapper>
         </ConnectKitWrapper>
       </body>
