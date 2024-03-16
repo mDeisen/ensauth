@@ -10,26 +10,30 @@ import "@ensdomains/ens-contracts/contracts/wrapper/INameWrapper.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
+// Emit TextChanged Event on Change
 
-contract Ensauth is IERC1155Receiver, ERC165, Initializable{
+contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
     struct Role {
         bool exists;
+        address[] users;
         mapping(address => bool) userExists;
     }
 
     struct Application {
         bool exists;
         address[] appAdmins;
+        string[] rolesArray;
         mapping(string => Role) roles;
     }
 
     mapping(bytes32 => Application) private applications;
 
-    uint public val; 
+    uint public val;
 
-    function initialize(uint256 _val ) external initializer{
+    function initialize(uint256 _val) external initializer {
         val = _val;
     }
+
     /**
      *
      * @param groupnode -- the namehash of the subdomain starting with "groups"
@@ -50,17 +54,17 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable{
         // Use default resolver
 
         // Set the ens lookup address of the subdomain to the address of this contract
-
-        // sepolia
-        Resolver(0x8FADE66B79cC9f707aB26799354482EB93a5B7dD).setAddr(
+        // Sepolia
+        INameWrapper(0x0635513f179D50A207757E05759CbD106d7dFcE8).setResolver(
             groupnode,
             address(this)
         );
+
         // mainnet
-        // Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(
-        //     groupnode,
-        //     address(this)
-        // );
+        INameWrapper().setResolver(
+            groupnode,
+            address(this)
+        )
     }
 
     /**
@@ -157,7 +161,9 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable{
         // Lookup the name of the node
 
         // Sepolia
-        bytes memory name = INameWrapper(0x0635513f179D50A207757E05759CbD106d7dFcE8).names(node);
+        bytes memory name = INameWrapper(
+            0x0635513f179D50A207757E05759CbD106d7dFcE8
+        ).names(node);
 
         // Check if the subdomain starts with "groups"
         require(
@@ -195,7 +201,6 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable{
         bytes memory name,
         bytes memory prefix
     ) public pure returns (bool) {
-
         // If the prefix is longer than the name, it's impossible for the name to start with the prefix
         if (prefix.length > name.length) {
             return false;
@@ -207,12 +212,29 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable{
 
         // Compare each byte of the prefix with the beginning of the name
         for (uint i = 0; i < prefix.length; i++) {
-            if (name[i+1] != prefix[i]) {
+            if (name[i + 1] != prefix[i]) {
                 return false; // If any byte doesn't match, the name doesn't start with the prefix
             }
         }
 
         // If all bytes match, the name starts with the prefix
         return true;
+    }
+
+    /**
+     * Returns the text data associated with an ENS node and key.
+     * @param node The ENS node to query.
+     * @param key The text data key to query.
+     * @return The associated text data as json with all groups and roles.
+     */
+    function text(
+        bytes32 node,
+        string calldata key
+    ) external view returns (string memory) {
+        if (keccak256(bytes(key)) != keccak256("groups")) {
+            return "";
+        }
+
+        return "Rolething";
     }
 }
