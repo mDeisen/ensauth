@@ -3,6 +3,7 @@ import ThorinWrapper from "@/components/ThorinWrapper";
 import type { Metadata } from "next";
 import "@/styles/index.scss"
 import localFont from "next/font/local"
+import Navbar from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "ENS Auth",
@@ -22,13 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${satoshi.className}`}>
-        <div className="container is-max-desktop">
-          <ConnectKitWrapper>
-            <ThorinWrapper>
-              {children}
-            </ThorinWrapper>
-          </ConnectKitWrapper>
-        </div>
+        <ConnectKitWrapper>
+          <ThorinWrapper>
+            <Navbar/>
+                {children}
+          </ThorinWrapper>
+        </ConnectKitWrapper>
       </body>
     </html>
   );

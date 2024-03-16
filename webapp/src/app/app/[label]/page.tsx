@@ -1,7 +1,7 @@
 "use client"
-import AppNotOwnedMessage from "@/components/RegisterAppFlow/AppNotOwnedMessage";
-import DomainNotOwnedMessage from "@/components/RegisterAppFlow/DomainNotOwnedMessage";
-import RegisterEnsPrompt from "@/components/RegisterAppFlow/RegisterEnsPrompt";
+import AppNotOwnedMessage from "@/components/registerAppFlow/AppNotOwnedMessage";
+import DomainNotOwnedMessage from "@/components/registerAppFlow/DomainNotOwnedMessage";
+import RegisterEnsPrompt from "@/components/registerAppFlow/RegisterEnsPrompt";
 import { isAppOwnedByUser, isAppRegistered } from "@/lib/eauth";
 import { getOwner } from "@/lib/ens";
 import { Skeleton } from "@ensdomains/thorin";

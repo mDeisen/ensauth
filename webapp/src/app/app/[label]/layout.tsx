@@ -8,7 +8,7 @@ export default function AppLayout({
 }>) {
     const { label: appLabel } = useParams();
   return (
-    <div>
+    <div className="container is-max-desktop">
         <section className="section">
             <div className="title">
                 {appLabel}
