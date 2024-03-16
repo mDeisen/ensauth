@@ -15,7 +15,7 @@ export default function Administration() {
       queryKey: ["groups", "appLabel"],
       queryFn: () => listGroups(wallet!, appLabel.toString()),
       enabled: !!wallet
-    })
+    });
 
   return (
     <>

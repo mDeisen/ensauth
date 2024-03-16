@@ -13,6 +13,7 @@
     "@ensdomains/thorin": "^0.6.46",
     "@tanstack/react-query": "^5.28.4",
     "bulma": "^0.9.4",
+    "bulma-o-steps": "^1.1.0",
     "classnames": "^2.5.1",
     "connectkit": "^1.7.2",
     "formik": "^2.4.5",

@@ -1,9 +1,8 @@
 "use client"
+import RegisterAppFlow from "@/components/registerAppFlow";
 import AppNotOwnedMessage from "@/components/registerAppFlow/AppNotOwnedMessage";
 import DomainNotOwnedMessage from "@/components/registerAppFlow/DomainNotOwnedMessage";
-import RegisterEnsPrompt from "@/components/registerAppFlow/RegisterEnsPrompt";
-import RegisterNowPrompt from "@/components/registerAppFlow/RegisterNowPrompt";
-import { isAppOwnedByUser, isAppRegistered } from "@/lib/eauth";
+import { isAppOwnedByUser, isAppRegistered, listGroups } from "@/lib/eauth";
 import { getOwner } from "@/lib/ens";
 import { Skeleton } from "@ensdomains/thorin";
 import { useQuery } from "@tanstack/react-query";
@@ -29,14 +28,32 @@ export default function Dashboard() {
       enabled: domainIsRegistered === true
     });
 
-    const { data: appIsOwnedByUser, isSuccess } = useQuery({
+    const { data: appIsOwnedByUser } = useQuery({
       queryKey: ["appOwned", appLabel],
       queryFn: () => isAppOwnedByUser(wallet!, appLabel.toString()),
       enabled: domainIsRegistered === true
     });
 
-    if (domainIsRegistered === false) {
-      return <RegisterEnsPrompt/>
+    const { data: groupsNumber } = useQuery({
+      queryKey: ["groups", "appLabel"],
+      queryFn: () => listGroups(wallet!, appLabel.toString()),
+      enabled: domainIsRegistered === true,
+      select: (groups) => groups.length
+    });
+
+    let step = 1;
+
+
+    if (domainIsRegistered === true) {
+      step = 2;
+    }
+
+    if (appIsRegistered === true) {
+      step = 3;
+    }
+
+    if (groupsNumber && groupsNumber > 0) {
+      step = 4
     }
 
     if (appIsOwnedByUser === false && appIsRegistered === false) {
@@ -47,9 +64,7 @@ export default function Dashboard() {
       return <AppNotOwnedMessage/>
     }
 
-    if (appIsRegistered === false) {
-      return <RegisterNowPrompt/>
-    }
+    return <RegisterAppFlow step={step}/>;
 
     return <Skeleton loading={!isSuccess}><div className="buttons">
       <Link className="button" href={`${path}/profile`}>
