@@ -1,4 +1,4 @@
-import { getOwner as getEnsOwner, getName, getRecords } from "@ensdomains/ensjs/public";
+import { GetNameReturnType, getOwner as getEnsOwner, getName, getRecords } from "@ensdomains/ensjs/public";
 import { createSubname } from "@ensdomains/ensjs/wallet";
 import { TransactionReceipt, WalletClient, publicActions } from "viem";
 
@@ -7,17 +7,16 @@ import { TransactionReceipt, WalletClient, publicActions } from "viem";
  * For meaning of records, see https://docs.ens.domains/ensip/5
  */
 interface Profile {
+    address: string,
     /**
-     * Display-text, primary name, or address
+     * Display-text. Falls back to primary name or address
      */
-    displayName: string
+    display: string,
     avatar?: string,
-    decsription?: string,
-    display?: string,
+    description?: string,
     url?: string,
     "com.twitter"?: string,
     [key: string]: string | undefined
-
 }
 
 export async function wrapSubdomain(client: WalletClient, subdomain: string, newOwner: `0x${string}`): Promise<TransactionReceipt> {
@@ -48,9 +47,15 @@ export async function getOwner(client: WalletClient, name: string): Promise<stri
  * @returns null if no primary name is set. Otherwise the name
  */
 export async function getPrimaryName(client: WalletClient, address?: `0x${string}`): Promise<string | null> {
-    const result = await getName(client.extend(publicActions) as any, {
-        address: address ?? client.account!.address
-    });
+    let result: GetNameReturnType;
+    try {
+            result = await getName(client.extend(publicActions) as any, {
+            address: address ?? client.account!.address
+        });
+    } catch(e) {
+        // Unlike documented, this seems to fail when there's nor primary name
+        return null;
+    }
 
     if (!result) return null;
 
@@ -63,24 +68,19 @@ export async function getPrimaryName(client: WalletClient, address?: `0x${string
  * @param address By default, the users address
  * @returns Profile, at minimum with an address as displayname
  */
-export async function getProfile(client: WalletClient, address?: `0x${string}`): Promise<Profile> {
-    const addressToLookup = address ?? client.account!.address
-    
+export async function getProfile(client: WalletClient, address: `0x${string}`): Promise<Profile> {
     const profile: Profile = {
-        displayName: addressToLookup
-    }
+        display: address,
+        address,
+    };
 
-    const reverseLookupResult = await getName(client.extend(publicActions) as any, {
-        address: addressToLookup
-    });
-
+    const reverseLookupResult = await getPrimaryName(client, address);
     if (!reverseLookupResult) return profile;
 
-    profile.displayName = reverseLookupResult.name;
+    profile.display = reverseLookupResult;
 
     const textRecords = await getRecords(client.extend(publicActions) as any, {
-        name: reverseLookupResult.name,
-        resolver: {address: reverseLookupResult.resolverAddress},
+        name: reverseLookupResult,
         texts: [ "avatar", "description", "display", "url", "com.twitter"]
     });
 
