@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
     struct Role {
         bool exists;
-        address[] users;
+        string[] users;
         mapping(address => bool) userExists;
     }
 
@@ -50,6 +50,7 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
 
         // Add the application entry
         applications[groupnode].exists = true;
+        applications[groupnode].appAdmins.push(msg.sender);
 
         // Use default resolver
 
@@ -61,10 +62,12 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         );
 
         // mainnet
-        INameWrapper().setResolver(
-            groupnode,
-            address(this)
-        )
+        // INameWrapper().setResolver(
+        //     groupnode,
+        //     address(this)
+        // );
+
+        constructTextRecordsAndEmitEvent(groupnode);
     }
 
     /**
@@ -81,6 +84,10 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
             "Role already exists."
         );
         applications[groupnode].roles[roleName].exists = true;
+        applications[groupnode].rolesArray.push(roleName);
+        
+        string memory result = arrayToString(applications[groupnode].rolesArray);
+        emit TextChanged(groupnode, "groups", "groups", result);
     }
 
     /**
@@ -100,7 +107,12 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         require(role.exists, "Role does not exist.");
         require(!role.userExists[account], "User already assigned to role.");
 
-        role.userExists[account] = true;
+        applications[groupnode].roles[roleName].userExists[account] = true;
+
+        applications[groupnode].roles[roleName].users.push(string(abi.encodePacked(account)));
+ 
+        
+        constructTextRecordsAndEmitEvent(groupnode);
     }
 
     /**
@@ -122,6 +134,16 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         require(role.userExists[account], "User not in role.");
 
         role.userExists[account] = false;
+
+        for (uint i = 0; i < role.users.length; i++) {
+            if (keccak256(bytes(role.users[i])) == keccak256(bytes(string(abi.encodePacked(account))))){
+                role.users[i] = role.users[role.users.length - 1];
+                role.users.pop();
+                break;
+            }
+        }
+
+        constructTextRecordsAndEmitEvent(groupnode);
     }
 
     function isAuthorized(
@@ -231,10 +253,58 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         bytes32 node,
         string calldata key
     ) external view returns (string memory) {
-        if (keccak256(bytes(key)) != keccak256("groups")) {
-            return "";
-        }
 
-        return "Rolething";
+        // if it is groups or starts with groups. return the groups
+        if (keccak256(bytes(key)) == keccak256("groups")) {
+            require(applications[node].exists, "Application does not exist.");
+            string memory result = arrayToString(applications[node].rolesArray);
+            return result;
+        } 
+        require(applications[node].exists, "Application does not exist.");
+        string memory role = string(abi.encodePacked(key));
+        require(applications[node].roles[role].exists, "Role does not exist."); 
+        return arrayToString(applications[node].roles[role].users);
+    }
+
+    /**
+     * Emits a TextChanged event for the given node and key.
+     * @param node The ENS node to emit the events for.
+     */
+    function constructTextRecordsAndEmitEvent(
+        bytes32 node
+    ) public {
+
+        // First emit the groups
+        string memory result = arrayToString(applications[node].rolesArray);
+        emit TextChanged(node, "groups", "groups", result);
+
+        // Then emit the roles as groups.rolename
+        for (uint i = 0; i < applications[node].rolesArray.length; i++) {
+            string memory role = applications[node].rolesArray[i];
+
+            string memory value = arrayToString(applications[node].roles[role].users);
+            string memory key = concatenateStrings("groups.", role);
+            emit TextChanged(node, key, key, value);
+        }
+    }
+
+    /**
+     * 
+     * @param array -- the array to convert to string
+     * @return result -- the space delimited string representation of the array
+     */
+    function arrayToString(
+        string[] memory array
+    ) private pure returns (string memory) {
+        string memory result = "";
+        for (uint i = 0; i < array.length; i++) {
+            result = string(abi.encodePacked(result, array[i], " "));
+        }
+        return result;
+    }
+
+    function concatenateStrings(string memory a, string memory b) public pure returns (string memory) {
+        bytes memory concatenatedBytes = abi.encodePacked(a, b);
+        return string(concatenatedBytes);
     }
 }

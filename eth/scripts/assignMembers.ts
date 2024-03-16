@@ -1,18 +1,17 @@
-import { createPublicClient, namehash } from "viem";
-import { sepolia } from "viem/chains";
-import { http } from "viem";
-import { addEnsContracts } from "@ensdomains/ensjs";
+import { namehash } from "viem";
 import hardhat from "hardhat";
-import { transferName } from "@ensdomains/ensjs/wallet";
+import { Address } from "viem";
 
+export default async function assignMembers(contractAddress :Address) {
 
-async function main() {
+    var contract = await hardhat.viem.getContractAt("Ensauth", contractAddress);
 
-var walletClient = await hardhat.viem.getWalletClient("0x5Dc2957BE65C937dbe92513665F3FC4E951d5AD4");
-
-    var contract = await hardhat.viem.getContractAt("Ensauth", "0x49b130D7BE8E7a96c55de4e4CEa1708c1211c2C1");
-    contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole", "0x69420f05A11f617B4B74fFe2E04B2D300dFA556F"])
+        const options = { gasLimit: 1000000 }; // Example gas limit, adjust based on needs
+        await contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole1", "0x69420f05A11f617B4B74fFe2E04B2D300dFA556F"])
+        await contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole1", "0x5Dc2957BE65C937dbe92513665F3FC4E951d5AD4"])
+        await contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole2", "0x69420f05A11f617B4B74fFe2E04B2D300dFA556F"])
+        await contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole3", "0x69420f05A11f617B4B74fFe2E04B2D300dFA556F"])
+        await contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole4", "0x69420f05A11f617B4B74fFe2E04B2D300dFA556F"])
+        await contract.write.assignRole([namehash("groups.ensauth123.eth"), "testrole6", "0x69420f05A11f617B4B74fFe2E04B2D300dFA556F"])
 
 }
-
-main();

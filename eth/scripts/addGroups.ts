@@ -1,18 +1,22 @@
-import { createPublicClient, namehash } from "viem";
-import { sepolia } from "viem/chains";
-import { http } from "viem";
-import { addEnsContracts } from "@ensdomains/ensjs";
+import { namehash } from "viem";
 import hardhat from "hardhat";
-import { transferName } from "@ensdomains/ensjs/wallet";
+import { Address } from "viem";
+
+export default async function addGroups(contractAddress :Address) {
+
+    var contract = await hardhat.viem.getContractAt("Ensauth", contractAddress);
+    
+
+    await contract.write.registerRole([namehash("groups.ensauth123.eth"), "testrole1"])
+    
+    await contract.write.registerRole([namehash("groups.ensauth123.eth"), "testrole2"])
+
+    await contract.write.registerRole([namehash("groups.ensauth123.eth"), "testrole3"])
+
+    await contract.write.registerRole([namehash("groups.ensauth123.eth"), "testrole4"])
+   
+    await contract.write.registerRole([namehash("groups.ensauth123.eth"), "testrole6"])
 
 
-async function main() {
-
-var walletClient = await hardhat.viem.getWalletClient("0x5Dc2957BE65C937dbe92513665F3FC4E951d5AD4");
-
-    var contract = await hardhat.viem.getContractAt("Ensauth", "0x49b130D7BE8E7a96c55de4e4CEa1708c1211c2C1");
-    contract.write.registerRole([namehash("groups.ensauth123.eth"), "testrole"])
 
 }
-
-main();
