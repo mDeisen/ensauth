@@ -3,7 +3,7 @@ import { FC } from "react";
 
 const DomainNotOwnedMessage: FC = () => {
   return (
-    <div>
+    <div className="block">
       You are not the owner of this ENS record. Only owners are allowed to register applications.
     </div>
   );
