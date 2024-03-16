@@ -11,7 +11,7 @@ interface ENS {
     function setResolver(bytes32 node, address resolver) external;
 }
 
-contract EnsAuth is IERC1155Receiver, ERC165 {
+contract Ensauth is IERC1155Receiver, ERC165 {
     struct Role {
         bool exists;
         address[] users;
