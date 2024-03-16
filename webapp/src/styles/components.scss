@@ -1,19 +1,33 @@
 .gli {
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     padding: 0.25rem 1rem;
-    cursor: pointer;
 
     &__container {
         padding: 0.3rem 0;
         border-bottom: 1px solid $grey-lighter;
     }
 
-    &:hover {
-        background-color: $grey-lightest;
-    }
-
     &__name {
         font-size: $size-5;
+        width: 8rem;
+    }
+
+    &__cross {
+        color: $danger;
+    }
+
+    &__buttons {
+        display: flex;
+        flex-direction: row;
+    
+        & svg {
+            align-items: center;
+            height: 1.5rem;
+            width: 1.5rem;
+            margin-left: 0.75rem;
+        }
     }
 }

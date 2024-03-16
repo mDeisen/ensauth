@@ -1,21 +1,32 @@
 "use client"
+import { CrossSVG, SpannerSVG } from "@ensdomains/thorin";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FC } from "react";
+import { FC, useState } from "react";
 
 const GroupsListItem: FC<{ groupName: string }> = ({ groupName }) => {
     const path = usePathname();
 
   return (
     <div className="gli__container">
-        <Link
+        <div
             className="gli"
-            href={`${path}/${groupName}`}
         >
             <div className="gli__name">
                 {groupName}
             </div>
-        </Link>
+            <div className="gli_members">
+                N members
+            </div>
+            <div className="gli__buttons">
+                <a onClick={() => {}}>
+                    <CrossSVG className="gli__cross"/>
+                </a>
+                <Link href={`${path}/${groupName}`}>
+                    <SpannerSVG className="gli__edit"/>
+                </Link>
+            </div>
+        </div>
     </div>
   );
 }
