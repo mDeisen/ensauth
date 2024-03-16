@@ -1,11 +1,22 @@
 "use client"
+import { listGroupMembers } from "@/lib/eauth";
 import { CrossSVG, SpannerSVG } from "@ensdomains/thorin";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { FC } from "react";
+import { useWalletClient } from "wagmi";
 
 const GroupsListItem: FC<{ groupName: string }> = ({ groupName }) => {
     const path = usePathname();
+    const { group, label: appLabel } = useParams();
+    const {data: wallet} = useWalletClient();
+    const { data: memberCount } = useQuery({
+        queryKey: ["members", appLabel, group],
+        queryFn: () => listGroupMembers(wallet!, appLabel.toString(), group.toString()),
+        enabled: !!wallet,
+        select: (m) => m.length
+      });
 
   return (
     <div className="gli__container">
@@ -16,7 +27,7 @@ const GroupsListItem: FC<{ groupName: string }> = ({ groupName }) => {
                 {groupName}
             </div>
             <div className="gli_members">
-                N members
+                {memberCount ?? "n"} members
             </div>
             <div className="gli__buttons">
                 <a onClick={() => {}}>

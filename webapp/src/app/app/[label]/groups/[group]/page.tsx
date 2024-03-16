@@ -14,7 +14,7 @@ export default function Administration() {
     queryKey: ["members", appLabel, group],
     queryFn: () => listGroupMembers(wallet!, appLabel.toString(), group.toString()),
     enabled: !!wallet
-  })
+  });
 
   return (
     <>
