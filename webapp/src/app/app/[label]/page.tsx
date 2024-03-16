@@ -2,6 +2,7 @@
 import AppNotOwnedMessage from "@/components/registerAppFlow/AppNotOwnedMessage";
 import DomainNotOwnedMessage from "@/components/registerAppFlow/DomainNotOwnedMessage";
 import RegisterEnsPrompt from "@/components/registerAppFlow/RegisterEnsPrompt";
+import RegisterNowPrompt from "@/components/registerAppFlow/RegisterNowPrompt";
 import { isAppOwnedByUser, isAppRegistered } from "@/lib/eauth";
 import { getOwner } from "@/lib/ens";
 import { Skeleton } from "@ensdomains/thorin";
@@ -47,7 +48,7 @@ export default function Dashboard() {
     }
 
     if (appIsRegistered === false) {
-      return <RegisterEnsPrompt/>
+      return <RegisterNowPrompt/>
     }
 
     return <Skeleton loading={!isSuccess}><div className="buttons">

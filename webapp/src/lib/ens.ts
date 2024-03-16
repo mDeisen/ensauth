@@ -1,6 +1,6 @@
 import { GetNameReturnType, getOwner as getEnsOwner, getName, getRecords, getAddressRecord, GetAddressRecordReturnType } from "@ensdomains/ensjs/public";
 import { createSubname } from "@ensdomains/ensjs/wallet";
-import { GetEnsAddressReturnType, TransactionReceipt, WalletClient, publicActions } from "viem";
+import { TransactionReceipt, WalletClient, publicActions } from "viem";
 
 /**
  * Profile of an Ethereum user, constructed from text records.
@@ -34,7 +34,7 @@ export async function getOwner(client: WalletClient, name: string): Promise<stri
     const result = await getEnsOwner(client.extend(publicActions) as any, {
         name
     });
-
+    
     if (!result) return null;
 
     return result.owner;

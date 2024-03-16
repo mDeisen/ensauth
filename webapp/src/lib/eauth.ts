@@ -1,5 +1,17 @@
-import { WalletClient, publicActions } from "viem";
+import { TransactionReceipt, WalletClient, getContract, namehash, publicActions } from "viem";
 import { getAddr, getOwner } from "./ens";
+import EnsAuthJson from "../../../eth/artifacts/contracts/Ensauth.sol/Ensauth.json"
+import { getTextRecord } from "@ensdomains/ensjs/public";
+import { normalize } from "viem/ens";
+import { waitForTransactionReceipt } from "viem/actions";
+
+const getEnsAuth = (wallet: WalletClient) => {
+    return getContract({
+        client: wallet,
+        abi: EnsAuthJson.abi,
+        address: process.env.NEXT_PUBLIC_EAUTH_CONTRACT_ADDR as any
+    })
+}
 
 /**
  * @param label Domain of the app
@@ -21,7 +33,7 @@ export async function getUsersGroups(client: WalletClient, label: string, user: 
     return ["Administrator", "Contributor"];
 }
 
-export async function addUserToGroup(client: WalletClient, label: string, user:string, group: string): Promise<void> {
+export async function addUserToGroup(client: WalletClient, label: string, user:string, group: string): Promise<TransactionReceipt> {
     let userAddr = user;
     if (user.includes(".")) {
         const addr = await getAddr(client.extend(publicActions) as any, user);
@@ -31,17 +43,32 @@ export async function addUserToGroup(client: WalletClient, label: string, user:s
         userAddr = addr;
     }
 
-    return;
+    const contract = getEnsAuth(client);
+    const node = namehash(normalize(`${process.env.NEXT_PUBLIC_AUTH_PREFIX}.${label}`));
+    const txHash = await contract.write.assignRole([node, group, userAddr]);
+    return waitForTransactionReceipt(client, {hash: txHash});
 }
 
 export async function listGroups(client: WalletClient, label: string): Promise<string[]> {
-    return ["Administrator", "Contributor", "Banned"];
+    const result = await getTextRecord(client.extend(publicActions) as any, {
+        name: `${process.env.NEXT_PUBLIC_AUTH_PREFIX}.${label}`,
+        key: "groups"
+    });
+
+    if (!result) {
+        throw new Error("Text record 'groups' not found");
+    }
+    
+    return result.trim().split(" ");
 }
 
 export async function listGroupMembers(client: WalletClient, label: string, groupName: string): Promise<string[]> {
     return ["0x123", "0x456"];
 }
 
-export async function createGroup(client: WalletClient, label: string, groupName: string): Promise<void> {
-    return;
+export async function createGroup(client: WalletClient, label: string, groupName: string): Promise<TransactionReceipt> {
+    const contract = getEnsAuth(client);
+    const node = namehash(normalize(`${process.env.NEXT_PUBLIC_AUTH_PREFIX}.${label}`))
+    const txHash = await contract.write.registerRole([node, groupName]);
+    return waitForTransactionReceipt(client, {hash: txHash});
 }
