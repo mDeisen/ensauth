@@ -4,8 +4,9 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract Ensauth is IERC1155Receiver, ERC165 {
+contract Ensauth is IERC1155Receiver, ERC165, Initializable {
     struct Role {
         bool exists;
         mapping(address => bool) userExists;
@@ -19,6 +20,11 @@ contract Ensauth is IERC1155Receiver, ERC165 {
 
     mapping(bytes32 => Application) private applications;
 
+    uint public val; 
+
+    function initialize(uint256 _val ) external initializer{
+        val = _val;
+    }
     /**
      *
      * @param groupnode -- the namehash of the subdomain starting with "groups"
