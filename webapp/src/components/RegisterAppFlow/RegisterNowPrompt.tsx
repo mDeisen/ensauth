@@ -1,10 +1,11 @@
 "use client"
 import { delegatedDomain } from "@/lib/eauth";
 import { wrapSubdomain } from "@/lib/ens";
-import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { FC } from "react";
 import { useWalletClient } from "wagmi";
+import cx from "classnames";
 
 const RegisterNowPrompt: FC = () => {
   const { label: appLabel } = useParams();
@@ -12,12 +13,12 @@ const RegisterNowPrompt: FC = () => {
   const qc = useQueryClient()
   const subdomain = delegatedDomain(appLabel.toString())
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: () => {
       if (!wallet) throw new Error("Wallet not defined");
       return wrapSubdomain(wallet!, subdomain, process.env.NEXT_PUBLIC_EAUTH_CONTRACT_ADDR as any);
     },
-    // Optimistic update
+    // Cache update
     onSuccess: () => qc.setQueryData(["appRegistered", appLabel], true)
   })
 
@@ -31,7 +32,7 @@ const RegisterNowPrompt: FC = () => {
           to the identity contract.
         </div>
         <div>
-            <button className="button is-primary" onClick={() => mutate()}>
+            <button className={cx("button is-primary", {"is-loading": isPending})} onClick={() => mutate()}>
                 Register
             </button>
         </div>
