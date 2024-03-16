@@ -1,5 +1,5 @@
-import { WalletClient } from "viem";
-import { getOwner } from "./ens";
+import { WalletClient, publicActions } from "viem";
+import { getAddr, getOwner } from "./ens";
 
 /**
  * @param label Domain of the app
@@ -19,6 +19,19 @@ export async function isAppOwnedByUser(client: WalletClient, label: string): Pro
 
 export async function getUsersGroups(client: WalletClient, label: string, user: string): Promise<string[]> {
     return ["Administrator", "Contributor"];
+}
+
+export async function addUserToGroup(client: WalletClient, label: string, user:string, group: string): Promise<void> {
+    let userAddr = user;
+    if (user.includes(".")) {
+        const addr = await getAddr(client.extend(publicActions) as any, user);
+        if (!addr) {
+            throw new Error(`Name ${user} cannot be resolved`);
+        }
+        userAddr = addr;
+    }
+
+    return;
 }
 
 export async function listGroups(client: WalletClient, label: string): Promise<string[]> {

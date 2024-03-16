@@ -5,30 +5,30 @@ import { FC } from "react";
 import cx from "classnames";
 import { useMutation } from "@tanstack/react-query";
 import { useWalletClient } from "wagmi";
-import { createGroup } from "@/lib/eauth";
+import { addUserToGroup } from "@/lib/eauth";
 import { useParams } from "next/navigation";
 
-const AddGroupField: FC = () => {
+const AddMemberField: FC = () => {
   const { data: wallet } = useWalletClient();
-  const { label: appLabel } = useParams();
+  const { label: appLabel, group } = useParams();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (vars: {newGroup: string}) => {
+    mutationFn: (vars: {newUser: string}) => {
       if (!wallet) throw new Error("Wallet is undefined");
-      return createGroup(wallet, appLabel.toString(), vars.newGroup)
-    }
+      return addUserToGroup(wallet, appLabel.toString(), vars.newUser, group.toString())
+    },
   })
 
   return (
-    <Formik initialValues={{newGroup: ""}} onSubmit={(vars) => mutate(vars)} validate={(vars) => {
-      if (vars.newGroup.includes(" ")) {
-        return {"newGroup": "Group name must not contain spaces"}
+    <Formik initialValues={{newUser: ""}} onSubmit={(vars) => mutate(vars)} validate={(vars) => {
+      if (vars.newUser.includes(" ")) {
+        return {"newUser": "New user must be an address or ENS name"}
       }
       return {};
     }}>
       {(props) =>
-        <Form className="add-groups-field">
-          <Field as={Input} label="Create a new group" placeholder="ExampleGroup" name="newGroup" error={props.errors.newGroup}/>
+        <Form className="add-member-field">
+          <Field as={Input} label="Add user to group" placeholder="0x1234..." name="newUser" error={props.errors.newUser}/>
           <button className={cx("button is-primary is-medium", {"is-loading": isPending})} type="submit" disabled={!props.isValid}>Create</button>
         </Form>
       }
@@ -36,4 +36,4 @@ const AddGroupField: FC = () => {
   );
 }
 
-export default AddGroupField;
+export default AddMemberField;

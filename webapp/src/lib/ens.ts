@@ -1,6 +1,6 @@
-import { GetNameReturnType, getOwner as getEnsOwner, getName, getRecords } from "@ensdomains/ensjs/public";
+import { GetNameReturnType, getOwner as getEnsOwner, getName, getRecords, getAddressRecord, GetAddressRecordReturnType } from "@ensdomains/ensjs/public";
 import { createSubname } from "@ensdomains/ensjs/wallet";
-import { TransactionReceipt, WalletClient, publicActions } from "viem";
+import { GetEnsAddressReturnType, TransactionReceipt, WalletClient, publicActions } from "viem";
 
 /**
  * Profile of an Ethereum user, constructed from text records.
@@ -38,6 +38,28 @@ export async function getOwner(client: WalletClient, name: string): Promise<stri
     if (!result) return null;
 
     return result.owner;
+}
+
+/**
+ * ENS lookup
+ * @param client 
+ * @param name
+ * @returns null if no record is set. Otherwise the address
+ */
+export async function getAddr(client: WalletClient, name: string): Promise<string | null> {
+    let result: GetAddressRecordReturnType;
+    try {
+        result = await getAddressRecord(client.extend(publicActions) as any, {
+        name,
+    });
+    } catch(e) {
+        // Unlike documented, this seems to fail when there's no record
+        return null;
+    }
+
+    if (!result) return null;
+
+    return result.value;
 }
 
 /**
