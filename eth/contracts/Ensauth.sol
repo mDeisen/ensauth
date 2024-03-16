@@ -7,9 +7,6 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@ensdomains/ens-contracts/contracts/resolvers/Resolver.sol";
 
-interface ENS {
-    function setResolver(bytes32 node, address resolver) external;
-}
 
 contract Ensauth is IERC1155Receiver, ERC165 {
     struct Role {
@@ -34,16 +31,17 @@ contract Ensauth is IERC1155Receiver, ERC165 {
      */
     function registerApplication(bytes32 groupnode) public {
         
-        // Check if the application exists. Revert if it does
+        // Check if the application exists. Revert if it does        
         require(!applications[groupnode].exists, "Application already registered.");
 
-        // Add the application entry
+        // Add the application entry        
         applications[groupnode].exists = true;
 
         // Use default resolver 
+        
         // Set the ens lookup address of the subdomain to the address of this contract
         Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(groupnode, address(this));
-    }
+   }
 
     /**
      * @param groupnode -- the namehash of the subdomain
@@ -95,7 +93,7 @@ contract Ensauth is IERC1155Receiver, ERC165 {
     ) public {
         // Revert if the application does not exist
         require(applications[groupnode].exists, "Application does not exist.");
-
+        
         // Revert if the role does not exist
         require(applications[groupnode].roles[roleName].exists,"Role does not exist.");
 
@@ -151,7 +149,7 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         
         // Check if the subdomain starts with "groups"
         require(startsWith(name, "groups"), "Subdomain must start with 'groups'");
-
+        
         registerApplication(bytes32(id));
 
         return this.onERC1155Received.selector;
@@ -203,15 +201,5 @@ contract Ensauth is IERC1155Receiver, ERC165 {
 
         // If all bytes match, the name starts with the prefix
         return true;
-    }
-
-    function extractEnsDomainsFromTokenData(
-        uint256 id,
-        bytes memory data
-    ) private pure returns (string memory, string memory) {
-        string memory ensSubdomain = "groups";
-        string memory ensParentDomain = "example.eth";
-
-        return (ensSubdomain, ensParentDomain);
     }
 }
