@@ -254,13 +254,14 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable, ITextResolver {
         string calldata key
     ) external view returns (string memory) {
 
-        // if it is groups or starts with groups. return the groups
+        // Return groups if it is groups
         if (keccak256(bytes(key)) == keccak256("groups")) {
             require(applications[node].exists, "Application does not exist.");
             string memory result = arrayToString(applications[node].rolesArray);
             return result;
         } 
         require(applications[node].exists, "Application does not exist.");
+        
         string memory role = string(abi.encodePacked(key));
         require(applications[node].roles[role].exists, "Role does not exist."); 
         return arrayToString(applications[node].roles[role].users);
