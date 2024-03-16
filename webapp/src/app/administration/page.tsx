@@ -9,7 +9,7 @@ import { wrapSubdomain } from "@/lib/ens";
 export default function Administration() {
   const { data: wallet } = useWalletClient()
 
-    const { mutate, data, error, status, isPending} = useMutation({
+    const { mutate, error, status, isPending} = useMutation({
       mutationFn: (vars: {subdomain: string, newOwner: `0x${string}`}) => {
         if (!wallet) {
           throw new Error("Wallet is undefined");
