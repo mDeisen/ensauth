@@ -9,11 +9,11 @@ import { useWalletClient } from "wagmi";
 
 const GroupsListItem: FC<{ groupName: string }> = ({ groupName }) => {
     const path = usePathname();
-    const { group, label: appLabel } = useParams();
+    const { label: appLabel } = useParams();
     const {data: wallet} = useWalletClient();
-    const { data: memberCount } = useQuery({
-        queryKey: ["members", appLabel, group],
-        queryFn: () => listGroupMembers(wallet!, appLabel.toString(), group.toString()),
+    const { data: memberCount, status, error } = useQuery({
+        queryKey: ["members", appLabel, groupName],
+        queryFn: () => listGroupMembers(wallet!, appLabel.toString(), groupName),
         enabled: !!wallet,
         select: (m) => m.length
       });
@@ -27,7 +27,7 @@ const GroupsListItem: FC<{ groupName: string }> = ({ groupName }) => {
                 {groupName}
             </div>
             <div className="gli_members">
-                {memberCount ?? "n"} members
+                {memberCount ?? 0} members
             </div>
             <div className="gli__buttons">
                 <a onClick={() => {}}>
