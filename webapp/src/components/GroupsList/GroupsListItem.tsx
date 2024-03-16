@@ -2,7 +2,7 @@
 import { CrossSVG, SpannerSVG } from "@ensdomains/thorin";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FC, useState } from "react";
+import { FC } from "react";
 
 const GroupsListItem: FC<{ groupName: string }> = ({ groupName }) => {
     const path = usePathname();

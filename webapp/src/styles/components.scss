@@ -42,3 +42,37 @@
         margin-left: 1rem;
     }
 }
+
+.ml {
+    display: flex;
+    flex-direction: row;
+    justify-content:left;
+    align-items: start;
+    flex-wrap: wrap;
+}
+
+.mli {
+    margin: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+
+    &__name {
+        width: 8rem;
+        margin: 0 1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__avatar {
+        width: 2rem;
+    }
+
+    &__cross {
+        color: $danger;
+        width: 1rem;
+        height: 1rem;
+    }
+}

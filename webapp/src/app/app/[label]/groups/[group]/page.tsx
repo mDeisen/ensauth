@@ -1,9 +1,20 @@
 "use client"
 import AddMemberField from "@/components/AddMemberField";
+import MembersList from "@/components/MembersList";
+import { listGroupMembers } from "@/lib/eauth";
+import { Skeleton } from "@ensdomains/thorin";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
+import { useWalletClient } from "wagmi";
 
 export default function Administration() {
-  const { group } = useParams()
+  const { group, label: appLabel } = useParams();
+  const {data: wallet} = useWalletClient();
+  const { data: members, isSuccess } = useQuery({
+    queryKey: ["members", appLabel, group],
+    queryFn: () => listGroupMembers(wallet!, appLabel.toString(), group.toString()),
+    enabled: !!wallet
+  })
 
   return (
     <>
@@ -11,9 +22,9 @@ export default function Administration() {
         Group: {group}
       </div>
       <AddMemberField/>
-      <div className="title is-6">
-        Members
-      </div>
+      <Skeleton loading={!isSuccess}>
+        {members && <MembersList groupMembers={members}/>}
+      </Skeleton>
     </>
   );
 }
