@@ -13,11 +13,13 @@ interface ENS {
 
 contract EnsAuth is IERC1155Receiver, ERC165 {
     struct Role {
-        string[] users;
+        bool exists;
+        address[] users;
     }
 
     struct Application {
-        bool exists; // Existence flag
+        bool exists;
+        address[] appAdmins;
         mapping(string => Role) roles;
     }
 
@@ -40,25 +42,47 @@ contract EnsAuth is IERC1155Receiver, ERC165 {
         resolver.setAddr(node, address(this));
     }
 
-    function registerRole(
-        string memory appName,
-        string memory roleName
-    ) public {}
+    function registerRole(bytes32 app, string memory roleName) public {
+        require(applications[app].exists, "Application does not exist.");
+        require(
+            !applications[app].roles[roleName].exists,
+            "Role already exists."
+        );
+        applications[app].roles[roleName].exists = true;
+    }
 
     function assignRole(
-        string memory appName,
+        bytes32 app,
         string memory roleName,
         address account
-    ) public {}
+    ) public {
+        require(applications[app].exists, "Application does not exist.");
+        applications[app].roles[roleName].users.push(account);
+    }
 
     function removeRole(
-        string memory appName,
+        bytes32 app,
         string memory roleName,
         address account
-    ) public {}
+    ) public {
+        require(applications[app].exists, "Application does not exist.");
+        require(
+            applications[app].roles[roleName].exists,
+            "Role does not exist."
+        );
+
+        Role storage role = applications[app].roles[roleName];
+        for (uint256 i = 0; i < role.users.length; i++) {
+            if (role.users[i] == account) {
+                role.users[i] = role.users[role.users.length - 1];
+                role.users.pop();
+                break;
+            }
+        }
+    }
 
     function isAuthorized(
-        string memory appName,
+        bytes32 app,
         string memory roleName,
         address account
     ) public pure returns (bool) {
@@ -108,8 +132,7 @@ contract EnsAuth is IERC1155Receiver, ERC165 {
 
     /**
      * @dev See {IERC1155Receiver-onERC1155BatchReceived}.
-     * For each token in the batch, call `onERC1155Received`.
-     * Not sure if this is the correct way to handle batch transfers.
+     * For each token in the batch register the application if the subdomain starts with "groups"
      */
     function onERC1155BatchReceived(
         address operator,
@@ -119,7 +142,19 @@ contract EnsAuth is IERC1155Receiver, ERC165 {
         bytes calldata data
     ) external override returns (bytes4) {
         for (uint256 i = 0; i < ids.length; i++) {
-            this.onERC1155Received(operator, from, ids[i], values[i], data);
+            (
+                string memory ensSubdomain,
+                string memory ensParentDomain
+            ) = extractEnsDomainsFromTokenData(ids[i], data);
+
+            // If the subdomain does not start with "groups" reject the token
+            require(
+                keccak256(abi.encodePacked(ensSubdomain)) ==
+                    keccak256(abi.encodePacked("groups")),
+                "Subdomain must be 'groups'"
+            );
+
+            registerApplication(bytes32(ids[i]), from);
         }
         return this.onERC1155BatchReceived.selector;
     }
