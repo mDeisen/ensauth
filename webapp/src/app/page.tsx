@@ -2,6 +2,7 @@
 import { ConnectKitButton } from "connectkit";
 import Link from "next/link";
 import { useAccount } from "wagmi";
+import cx from "classnames";
 
 export default function Dashboard() {
   const { isConnected } = useAccount();
@@ -20,8 +21,7 @@ export default function Dashboard() {
       <section className="section">
         <ConnectKitButton/>
       </section>
-      {isConnected
-      ? <section className="section">
+      <section className={cx("section", {"is-hidden": !isConnected})}>
         <div className="buttons">
           <Link className="button" href="/profile">
             Your profile
@@ -31,9 +31,9 @@ export default function Dashboard() {
           </Link>
         </div>
       </section>
-      : <section className="section">
+      <section className={cx("section", {"is-hidden": isConnected})}>
         You have to connect with your wallet to continue
-      </section>}
+      </section>
     </>
   );
 }

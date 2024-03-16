@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Formik, Form, Field } from "formik"
 import cx from "classnames"
 import { useAccount, useTransaction } from "wagmi";
+import { FieldSet, Input } from "@ensdomains/thorin"
 
 export default function Administration() {
   const { address } = useAccount();
@@ -28,9 +29,6 @@ export default function Administration() {
         </div>
       </section>
       <section>
-        <div className="title is-4">
-          Wrap and send domain name
-        </div>
         <Formik 
           className="block"
           initialValues={{
@@ -42,12 +40,10 @@ export default function Administration() {
           }
         >
           <Form>
-            <p>Subdomain:</p>
-            <Field name="subdomain"/>
-
-            <p>New owner:</p>
-            0x<Field name="newOwnerWithout0x"/>
-
+            <FieldSet legend="Wrap and send domain name" className="block">
+              <Field as={Input} label="Subdomain" placeholder="groups.example.com" name="subdomain"/>
+              <Field as={Input} label="New owner" placeholder="1234..." prefix="0x" name="newOwnerWithout0x"/>
+            </FieldSet>
             <div className="buttons is-right">
               <button type="reset" className="button is-outlined is-danger">
                 Reset
