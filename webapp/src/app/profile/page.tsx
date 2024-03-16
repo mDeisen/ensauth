@@ -1,15 +1,19 @@
 "use client"
 import { checkOwnership } from "@/lib/ens";
 import { useQuery } from "@tanstack/react-query";
+import { useWalletClient } from "wagmi";
 
 export default function Profile() {
+  const {data: wallet} = useWalletClient()
   const { status, data, isSuccess, error } = useQuery({
     queryKey: ["checkowner"],
     queryFn: () => {
-        return checkOwnership("eauth.eth")
-    },
-    retry: false,
-    
+      console.log(wallet)
+      if (!wallet) {
+        throw new Error("Wallet is undefined");
+      }
+      return checkOwnership(wallet, "eauth.eth")
+    }
   })
 
   return (
