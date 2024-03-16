@@ -16,3 +16,11 @@ export async function isAppOwnedByUser(client: WalletClient, label: string): Pro
     const owner = await getOwner(client, label);
     return owner === client.account?.address;
 }
+
+export async function getUsersGroups(client: WalletClient, label: string): Promise<string[]> {
+    return ["Administrator", "Contributor"];
+}
+
+export async function listGroupMembers(client: WalletClient, label: string, groupName: string): Promise<string[]> {
+    return ["0x123", "0x456"];
+}
