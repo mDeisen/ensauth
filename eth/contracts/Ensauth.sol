@@ -153,7 +153,7 @@ contract Ensauth is IERC1155Receiver, ERC165, Initializable {
             "Subdomain must start with 'groups'"
         );
 
-        registerApplication(bytes32(id));
+        // registerApplication(bytes32(id));
 
         return this.onERC1155Received.selector;
     }

@@ -1,4 +1,4 @@
-import { getOwner } from "@ensdomains/ensjs/public";
+import { getOwner as getEnsOwner } from "@ensdomains/ensjs/public";
 import { createSubname } from "@ensdomains/ensjs/wallet";
 import { TransactionReceipt, WalletClient, publicActions } from "viem";
 
@@ -13,14 +13,12 @@ export async function wrapSubdomain(client: WalletClient, subdomain: string, new
     return client.extend(publicActions).waitForTransactionReceipt({hash})
 }
 
-export async function checkOwnership(client: WalletClient, name: string): Promise<string> {
-    const result = await getOwner(client.extend(publicActions) as any, {
+export async function getOwner(client: WalletClient, name: string): Promise<string | null> {
+    const result = await getEnsOwner(client.extend(publicActions) as any, {
         name
     });
 
-    if (!result) {
-        throw new Error("Address is not registered");
-    }
+    if (!result) return null;
 
-    return result.owner;
+    return result?.owner;
 }
