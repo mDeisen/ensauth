@@ -40,13 +40,9 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         // Add the application entry
         applications[groupnode].exists = true;
 
-        // Set the address in the resolver (currently hardcoded to the public resolver)
-        ENS ens;
-        ens.setResolver(groupnode, 0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63);
-        
+        // Use default resolver 
         // Set the ens lookup address of the subdomain to the address of this contract
-        Resolver resolver;
-        resolver.setAddr(groupnode, address(this));
+        Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).setAddr(groupnode, address(this));
     }
 
     /**
@@ -143,20 +139,18 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         address operator, // The address which initiated the transfer
         address from, // The address which previously owned the token
         uint256 id, // The labelhash of the .eth domain
-        uint256 value, // ??
-        bytes calldata data // ?? 
+        uint256 value, // Dont use
+        bytes calldata data // Dont use
     ) external override returns (bytes4) {
-        (
-            string memory ensSubdomain,
-            string memory ensParentDomain
-        ) = extractEnsDomainsFromTokenData(id, data);
-
-        // If the subdomain does not start with "groups" reject the token
-        require(
-            keccak256(abi.encodePacked(ensSubdomain)) ==
-                keccak256(abi.encodePacked("groups")),
-            "Subdomain must be 'groups'"
-        );
+        
+        // Transform id into the namehash in bytes32
+        bytes32 node = bytes32(id);
+        
+        // Lookup the name of the node
+        string memory name = Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).name(node);
+        
+        // Check if the subdomain starts with "groups"
+        require(startsWith(name, "groups"), "Subdomain must start with 'groups'");
 
         registerApplication(bytes32(id));
 
@@ -175,21 +169,39 @@ contract Ensauth is IERC1155Receiver, ERC165 {
         bytes calldata data
     ) external override returns (bytes4) {
         for (uint256 i = 0; i < ids.length; i++) {
-            (string memory ensSubdomain, string memory ensParentDomain
-            ) = extractEnsDomainsFromTokenData(ids[i], data);
 
-            // If the subdomain does not start with "groups" reject the token
-            require(keccak256(abi.encodePacked(ensSubdomain)) ==
-                    keccak256(abi.encodePacked("groups")),"Subdomain must be 'groups'");
+            // Transform id into the namehash in bytes32
+            bytes32 node = bytes32(ids[i]);
+
+            // Lookup the name of the node
+            string memory name = Resolver(0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63).name(node);
+
+            // Check if the subdomain starts with "groups"
+            require(startsWith(name, "groups"), "Subdomain must start with 'groups'");
 
             registerApplication(bytes32(ids[i]));
         }
         return this.onERC1155BatchReceived.selector;
     }
 
-    function subdomainStartsWithGroup(
-        string memory subdomain
-    ) internal pure returns (bool) {
+
+   function startsWith(string memory name, string memory prefix) public pure returns (bool) {
+        bytes memory nameBytes = bytes(name);
+        bytes memory prefixBytes = bytes(prefix);
+
+        // If the prefix is longer than the name, it's impossible for the name to start with the prefix
+        if (prefixBytes.length > nameBytes.length) {
+            return false;
+        }
+
+        // Compare each byte of the prefix with the beginning of the name
+        for (uint i = 0; i < prefixBytes.length; i++) {
+            if (nameBytes[i] != prefixBytes[i]) {
+                return false; // If any byte doesn't match, the name doesn't start with the prefix
+            }
+        }
+
+        // If all bytes match, the name starts with the prefix
         return true;
     }
 
