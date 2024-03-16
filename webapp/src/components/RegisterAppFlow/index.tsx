@@ -102,7 +102,7 @@ const RegisterAppFlow: FC<{step: number}> = ({ step }) => {
             </div>
             <div>
                 Use ENS text records to check group memberships in your app. 
-                Read our <a className="link" href="#">docs</a> and <a className="link" href="#">examples</a> to learn more.
+                Read our <a className="link" href="https://github.com/mDeisen/ensauth/blob/main/ReadMe.md">docs</a> and <a className="link" href="https://github.com/mDeisen/ensauth/blob/main/ReadMe.md">examples</a> to learn more.
             </div>
         </div>
       </li>
