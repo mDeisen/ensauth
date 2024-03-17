@@ -10,7 +10,7 @@ export default function AppLayout({
   return (
     <div className="container is-max-desktop">
         <section className="section">
-            <div className="title">
+            <div className="title is-2">
                 {appLabel}
             </div>
         </section>

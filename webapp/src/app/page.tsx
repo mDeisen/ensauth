@@ -16,7 +16,7 @@ export default function LandingPage() {
 
   return (
     <>
-      <section className="hero is-medium is-primary">
+      <section className="hero is-small is-primary">
         <div className="hero-body">
           <div className="title">
             ENS Auth
